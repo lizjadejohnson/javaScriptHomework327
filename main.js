@@ -77,32 +77,67 @@ const LearnerSubmissions = [
   },
 ];
 
+// 1. If an AssignmentGroup does not belong to its course (mismatching course_id),
+// your program should throw an error, letting the user know that the input was invalid.
+// (try/catch) - try seeing if the assignment group id: (eg 12345) matches the course info id
+
+const verifyCourseID = () => {
+  try {
+    // Try seeing if the assignment group id: (eg 12345) matches the course info id:
+    if (AssignmentGroup.course_id === CourseInfo.id) {
+    } else {
+      console.log(`Sorry. ${AssignmentGroup.id} is not a valid course ID.`); // If b is not 0, show the division result
+    }
+  } catch (error) {
+    // If there was an error in the try block, do this
+    console.error(`Error: ${error.message}`); // Show the error message
+  } finally {
+    // No matter what happens in try and catch, do this
+    console.log("Found valid course."); // Always show this message at the end
+  }
+};
+
+// 2. You should also account for potential errors in the data that your program receives.
+// What if points_possible is 0? You cannot divide by zero.
+// What if a value that you are expecting to be a number is instead a string?
+// (try/catch, throw errors)
+
+// 3. If an assignment is not yet due, do not include it in the results or the average.
+// * Make a simple function which compares dates to see due yet. In actual program, call to check if due if not ignore it.
+
+// 4. If the learner's submission is late, deduct 10 percent of the total points possible from their score for that assignment.
+// * Make a simple function which compares dates to see if late. In actual program, call to check if late
+
+//////////////////////////// MAIN PROGRAM ////////////////////////////
+
+// Create a function named getLearnerData() that accepts these values as parameters,
+// in the order listed: (CourseInfo, AssignmentGroup, [LearnerSubmission]),
+// and returns the formatted result, which should be an array of objects as described.
+
 function getLearnerData(course, ag, submissions) {
-  // here, we would process this data to achieve the desired result:
+  // Call verifyCourseID()
 
-  // Create a function named getLearnerData() that accepts these values as parameters,
-  // in the order listed: (CourseInfo, AssignmentGroup, [LearnerSubmission]),
-  // and returns the formatted result, which should be an array of objects as described.
+  //for every learner....
 
-  // 1. If an AssignmentGroup does not belong to its course (mismatching course_id),
-  // your program should throw an error, letting the user know that the input was invalid.
-  // (try/catch)
+  //need to be checking the learner_id's
 
-  // 2. You should also account for potential errors in the data that your program receives.
-  // What if points_possible is 0? You cannot divide by zero.
-  // What if a value that you are expecting to be a number is instead a string?
-  // (try/catch, throw errors)
+  //need to compare the LearnerSubmissions.forEach(submission => console.log(submission.submission.score)); against the
+  // AssignmentGroup -> assignments -> points_possible... figure out weighted averages...lol
 
-  // 3. If an assignment is not yet due, do not include it in the results or the average.
-  // * Make a simple function which compares dates to see due yet. In actual program, call to check if due if not ignore it.
-
-  // 4. If the learner's submission is late, deduct 10 percent of the total points possible from their score for that assignment.
-  // * Make a simple function which compares dates to see if late. In actual program, call to check if late
+  //Crate key value pairs where the key is the AssignmentsGroup -> Assignment -> assignment_id
+  // and the value is the learners score -- LearnerSubmissions.forEach(submission => console.log(submission.submission.score));
+  // against the AssignmentGroup -> assignments -> points_possible
 
   const result = [
     {
+      // the ID of the learner for which this data has been collected
       id: 125,
+      // the learner’s total, weighted average, in which assignments with more points_possible should be counted for more
       avg: 0.985, // (47 + 150) / (50 + 150)
+
+      //Assignments:
+      //  Each assignment should be listed and have the key be set to its ID
+      //  and the value should be the percentage that the learner scored on the assignment (submission.score / points_possible)
       1: 0.94, // 47 / 50
       2: 1.0, // 150 / 150
     },
