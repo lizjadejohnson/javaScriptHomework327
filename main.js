@@ -96,6 +96,12 @@ const verifyCourseID = () => {
     console.log("Found valid course."); // Always show this message at the end
   }
 };
+const getStudentList = () => {
+  const studentList = LearnerSubmissions.map((learner) => learner.learner_id);
+  // I knew sets exist, but I had to cheat to find how to do this:
+  // Use a Set to remove duplicates, resulting in a list of unique learner_ids
+  return Array.from(new Set(studentList));
+};
 
 // 2. You should also account for potential errors in the data that your program receives.
 // What if points_possible is 0? You cannot divide by zero.
@@ -117,9 +123,13 @@ const verifyCourseID = () => {
 function getLearnerData(course, ag, submissions) {
   // Call verifyCourseID()
 
+  //call studentList. let studentList = studentList();
+
   //for every learner....
 
   //need to be checking the learner_id's
+
+  //Need to call to see if assignment is due (if not, ignore), or if assignment is late (deduct points)
 
   //need to compare the LearnerSubmissions.forEach(submission => console.log(submission.submission.score)); against the
   // AssignmentGroup -> assignments -> points_possible... figure out weighted averages...lol
