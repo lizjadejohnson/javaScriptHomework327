@@ -132,7 +132,7 @@ const isLate = (submittedAt, dueDate, score) => {
 // and returns the formatted result, which should be an array of objects as described.
 
 function getLearnerData(course, ag, submissions) {
-  verifyCourseID();
+  verifyCourseID(course, ag);
 
   let studentList = getStudentList();
 
