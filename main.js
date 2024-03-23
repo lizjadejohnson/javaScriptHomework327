@@ -136,12 +136,41 @@ function getLearnerData(course, ag, submissions) {
 
   let studentList = getStudentList();
 
+  //Making a new result object which looks like this:
+  class Result {
+    constructor(studentID) {
+      this.studentID = studentID;
+      this.assignments = new Map(); // Using a Map to create assignment/score pairs
+    }
+    // Class Method to add or update an assignment and its score
+    addOrUpdateAssignmentScore(assignmentID, score) {
+      this.assignments.set(assignmentID, score);
+    }
+  }
+
   //for every student in StudentList....
   studentList.forEach((student) => {
+    //forEach iterate overall objects in learnerSubmissions
+    //check if student is a match to LearnerSubmissions ->  learner_id, if so, do:
     if (student === 0) {
+      //call isDue function to check if that assignment is due yet, if not continue
+      if (isDue) {
+        //If it is due, we need to calculate their score
+        let score (LearnerSubmissions->submission->score) / pointspossible (AssignmentGroup -> assignments -> points_possible) * 100;
+        //Once we have their score we should also check to see if its late so we can adjust the score
+        if (isLate){
+          score -= (score * .1);
+        }
+      } else {
+        continue
+      }
+
+      //Then we can store the assignment id and their score as a key:value pair in an array called assignmentScores
+
+      new Result(student); //Create new result object with student id
+      Result.addOrUpdateAssignmentScore(assignmentID, score); //send over the assignment ID and final score
       console.log("Do this");
     }
-    //check if student is a match to LearnerSubmissions ->  learner_id, if so do:
   });
   // this
   //else continue
