@@ -81,19 +81,11 @@ const LearnerSubmissions = [
 // your program should throw an error, letting the user know that the input was invalid.
 // (try/catch) - try seeing if the assignment group id: (eg 12345) matches the course info id
 
-const verifyCourseID = () => {
-  try {
-    // Try seeing if the assignment group id: (eg 12345) matches the course info id:
-    if (AssignmentGroup.course_id === CourseInfo.id) {
-    } else {
-      console.log(`Sorry. ${AssignmentGroup.id} is not a valid course ID.`); // If b is not 0, show the division result
-    }
-  } catch (error) {
-    // If there was an error in the try block, do this
-    console.error(`Error: ${error.message}`); // Show the error message
-  } finally {
-    // No matter what happens in try and catch, do this
-    console.log("Found valid course."); // Always show this message at the end
+const verifyCourseID = (courseInfo, assignmentGroup) => {
+  if (assignmentGroup.course_id !== courseInfo.id) {
+    throw new Error(
+      `Course ID mismatch: ${assignmentGroup.course_id} does not match ${courseInfo.id}`
+    );
   }
 };
 const getStudentList = () => {
@@ -110,9 +102,28 @@ const getStudentList = () => {
 
 // 3. If an assignment is not yet due, do not include it in the results or the average.
 // * Make a simple function which compares dates to see due yet. In actual program, call to check if due if not ignore it.
+const isDue = (dueDate) => {
+  const now = new Date();
+  const due = new Date(dueDate);
+  if (now >= due) {
+    return true;
+  } else {
+    return false;
+  }
+};
 
 // 4. If the learner's submission is late, deduct 10 percent of the total points possible from their score for that assignment.
 // * Make a simple function which compares dates to see if late. In actual program, call to check if late
+
+const isLate = (submittedAt, dueDate, score) => {
+  const submissionDate = new Date(submittedAt);
+  const dateDue = new Date(dueDate);
+  if (submissionDate > dateDue) {
+    return score - score * 0.1;
+  } else {
+    return score;
+  }
+};
 
 //////////////////////////// MAIN PROGRAM ////////////////////////////
 
@@ -121,13 +132,19 @@ const getStudentList = () => {
 // and returns the formatted result, which should be an array of objects as described.
 
 function getLearnerData(course, ag, submissions) {
-  // Call verifyCourseID()
+  verifyCourseID();
 
-  //call studentList. let studentList = studentList();
+  let studentList = getStudentList();
 
-  //for every learner....
-
-  //need to be checking the learner_id's
+  //for every student in StudentList....
+  studentList.forEach((student) => {
+    if (student === 0) {
+      console.log("Do this");
+    }
+    //check if student is a match to LearnerSubmissions ->  learner_id, if so do:
+  });
+  // this
+  //else continue
 
   //Need to call to see if assignment is due (if not, ignore), or if assignment is late (deduct points)
 
