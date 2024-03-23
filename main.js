@@ -115,15 +115,25 @@ const isDue = (dueDate) => {
 // 4. If the learner's submission is late, deduct 10 percent of the total points possible from their score for that assignment.
 // * Make a simple function which compares dates to see if late. In actual program, call to check if late
 
-const isLate = (submittedAt, dueDate, score) => {
+const scoreCalc = (submittedAt,score) => {
   const submissionDate = new Date(submittedAt);
-  const dateDue = new Date(dueDate);
+  const dateDue = new Date(dueDate); //get due date from iterating over assignments list!!
   if (submissionDate > dateDue) {
     return score - score * 0.1;
   } else {
     return score;
   }
 };
+
+
+
+
+//Making a new result array of objects which looks like this:
+
+
+const result = [];
+
+
 
 //////////////////////////// MAIN PROGRAM ////////////////////////////
 
@@ -136,40 +146,50 @@ function getLearnerData(course, ag, submissions) {
 
   let studentList = getStudentList();
 
-  //Making a new result object which looks like this:
-  class Result {
-    constructor(studentID) {
-      this.studentID = studentID;
-      this.assignments = new Map(); // Using a Map to create assignment/score pairs
-    }
-    // Class Method to add or update an assignment and its score
-    addOrUpdateAssignmentScore(assignmentID, score) {
-      this.assignments.set(assignmentID, score);
-    }
-  }
-
   //for every student in StudentList....
   studentList.forEach((student) => {
     //forEach iterate overall objects in learnerSubmissions
-    //check if student is a match to LearnerSubmissions ->  learner_id, if so, do:
-    if (student === 0) {
-      //call isDue function to check if that assignment is due yet, if not continue
-      if (isDue) {
-        //If it is due, we need to calculate their score
-        let score (LearnerSubmissions->submission->score) / pointspossible (AssignmentGroup -> assignments -> points_possible) * 100;
-        //Once we have their score we should also check to see if its late so we can adjust the score
-        if (isLate){
-          score -= (score * .1);
-        }
+    LearnerSubmissions.forEach(submission => {
+      //check if student is a match to LearnerSubmissions ->  learner_id, if so, do:
+      if (student === learnerID) {
+        //Save all this as variables that are easier to refer to:
+        let learnerID = submission.learner_id;
+        let assignmentID = submission.assignment_id;
+        let submittedAt = submission.submission.submitted_at;
+        let score = submission.submission.score;
+
+        let isDue = isDue(dueDate);
+          if (isDue) {
+            //If it is due, we need to calculate their score
+            //To calculate score we need to know when it was due, when it was submitted, their score and the total possible score.
+            AssignmentGroup.forEach(assignment => {
+              let assignmentCount = 0
+              let totalScore = 0;
+              if (assignmentID === id) {
+                let dueDate = assignment.due_at;
+                let possiblepts = assignment.points_possible;
+                let score = scoreCalc(dueDate, submittedAt, score, possiblepts)
+                let assignmentCount =+ 1;
+                let totalScore =+ score;
+              } else {
+                  continue;
+              }
+            }
+          } else {
+              continue;
+          }
       } else {
-        continue
+        continue;
       }
+    }
+
+
 
       //Then we can store the assignment id and their score as a key:value pair in an array called assignmentScores
 
-      new Result(student); //Create new result object with student id
-      Result.addOrUpdateAssignmentScore(assignmentID, score); //send over the assignment ID and final score
-      console.log("Do this");
+       //Create new result object with student id
+       //send over the assignment ID and final score
+
     }
   });
   // this
@@ -184,7 +204,7 @@ function getLearnerData(course, ag, submissions) {
   // and the value is the learners score -- LearnerSubmissions.forEach(submission => console.log(submission.submission.score));
   // against the AssignmentGroup -> assignments -> points_possible
 
-  const result = [
+  const resultttttt = [
     {
       // the ID of the learner for which this data has been collected
       id: 125,
