@@ -77,6 +77,8 @@ const LearnerSubmissions = [
   },
 ];
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 // 1. If an AssignmentGroup does not belong to its course (mismatching course_id),
 // your program should throw an error, letting the user know that the input was invalid.
 // (try/catch) - try seeing if the assignment group id: (eg 12345) matches the course info id
@@ -172,7 +174,9 @@ function getLearnerData(course, ag, submissions) {
               assignmentCount++; //keep track of total student assignments for avg
               totalScore += calculatedScore * possiblepts; // Weight by points possible
               totalPointsPossible += possiblepts;
-              assignmentsResults[assignmentID] = calculatedScore / 100; // Store as a fraction for consistency
+              assignmentsResults[assignmentID] = (
+                calculatedScore / 100
+              ).toFixed(2); // Store as a fraction for consistency
             }
           }
         });
@@ -188,27 +192,6 @@ function getLearnerData(course, ag, submissions) {
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-
-// const resultExampleFormat = [
-//   {
-//     // the ID of the learner for which this data has been collected
-//     id: 125,
-//     // the learner’s total, weighted average, in which assignments with more points_possible should be counted for more
-//     avg: 0.985, // (47 + 150) / (50 + 150)
-
-//     //Assignments:
-//     //  Each assignment should be listed and have the key be set to its ID
-//     //  and the value should be the percentage that the learner scored on the assignment (submission.score / points_possible)
-//     1: 0.94, // 47 / 50
-//     2: 1.0, // 150 / 150
-//   },
-//   {
-//     id: 132,
-//     avg: 0.82, // (39 + 125) / (50 + 150)
-//     1: 0.78, // 39 / 50
-//     2: 0.833, // late: (140 - 15) / 150
-//   },
-// ];
 
 const result = getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions);
 
