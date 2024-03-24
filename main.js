@@ -208,4 +208,4 @@ function getLearnerData(course, ag, submissions) {
 
 const result = getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions);
 
-console.log(result);
+console.log(JSON.stringify(result, null, 2)); // Nicely format the output for readability
