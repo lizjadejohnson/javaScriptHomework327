@@ -121,27 +121,10 @@ const isDue = (dueDate) => {
 const scoreCalc = (dueDate, submittedAt, score, possiblepts) => {
   const submissionDate = new Date(submittedAt);
   const dateDue = new Date(dueDate);
-  // let finalScore = submissionDate > dateDue ? score - possiblepts * 0.1 : score;
-  // Note - I had the above written, which I think is better, but the assignment calls for a case so ...
-  let isOnTime = submissionDate <= dateDue ? "On Time" : "Late";
-  let finalScore = score; // Initialize finalScore
-
-  switch (isOnTime) {
-    case "On Time":
-      // No penalty, so finalScore remains unchanged
-      break;
-    case "Late":
-      // Apply penalty directly to the raw score if late
-      finalScore -=  * 0.1; // Deduct 10% of possible points from score if late
-      break;
-    default:
-      // Ideally, you'll never hit this
-      console.error("Unexpected case for timeliness of submission");
-      break;
-  }
-
+  // Apply penalty directly to the raw score if late
+  let finalScore = submissionDate > dateDue ? score - possiblepts * 0.1 : score;
   // Then convert to a percentage for consistent representation
-  return finalScore / possiblepts;
+  return (finalScore / possiblepts) * 100;
 };
 
 //////////////////////////// MAIN PROGRAM ////////////////////////////
@@ -156,50 +139,44 @@ function getLearnerData(course, ag, submissions) {
   let studentList = getStudentList();
   const result = [];
 
+  //for every student in StudentList....
   studentList.forEach((student) => {
+    //Set their assignment count and total score to 0 for now
+    //create assignment and grade array
     let assignmentCount = 0;
     let totalScore = 0;
-    let totalPointsPossible = 0;
+    let totalPointsPossible = 0; // Keep track of total points for weighted average
     let assignmentsResults = {};
-
+    //forEach iterate overall objects in learnerSubmissions
     submissions.forEach((submission) => {
+      //check if student is a match to LearnerSubmissions ->  learner_id, if so, do:
       if (student === submission.learner_id) {
+        //Save all this as variables that are easier to refer to:
         let assignmentID = submission.assignment_id;
         let submittedAt = submission.submission.submitted_at;
         let score = submission.submission.score;
-
-        ag.assignments.forEach((assignment) => {
-          //If a matching assignment is found...
+        //For each assignment in AssignmentGroup...:
+        AssignmentGroup.assignments.forEach((assignment) => {
           if (assignmentID === assignment.id) {
             let dueDate = assignment.due_at;
+            //Check if assignment is due:
             let isAssignmentDue = isDue(dueDate);
-
             if (isAssignmentDue) {
+              //If it is due, we need to calculate their score
+              //To calculate score we need to know when it was due, when it was submitted, their score and the total possible score.
               let possiblepts = assignment.points_possible;
-              let calculatedScore;
-
-              try {
-                if (possiblepts === 0) {
-                  throw new Error("Points possible cannot be zero.");
-                }
-
-                calculatedScore = scoreCalc(
-                  dueDate,
-                  submittedAt,
-                  score,
-                  possiblepts
-                );
-                totalScore += calculatedScore;
-                assignmentsResults[assignmentID] = Number(calculatedScore); // Storing score percentage
-              } catch (error) {
-                console.error(
-                  `Error with assignment ${assignmentID}: ${error.message}`
-                );
-              } finally {
-                totalPointsPossible += possiblepts;
-              }
-
-              assignmentCount++;
+              let calculatedScore = scoreCalc(
+                dueDate,
+                submittedAt,
+                score,
+                possiblepts
+              ); //Calc the score incl if its late
+              assignmentCount++; //keep track of total student assignments for avg
+              totalScore += calculatedScore * possiblepts; // Weight by points possible
+              totalPointsPossible += possiblepts;
+              assignmentsResults[assignmentID] = (
+                calculatedScore / 100
+              ).toFixed(2); // Store as a fraction for consistency
             }
           }
         });
@@ -207,23 +184,14 @@ function getLearnerData(course, ag, submissions) {
     });
 
     if (assignmentCount > 0) {
-      // Calculate average percentage score across all assignments
-      let avg = totalScore / totalPointsPossible;
-      result.push({
-        id: student,
-        avg: Number(avg),
-        ...assignmentsResults,
-      });
+      let avg = totalScore / totalPointsPossible / 100; // Calculate weighted average correctly
+      result.push({ id: student, avg, ...assignmentsResults });
     }
   });
-
   return result;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
 const result = getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions);
-
 console.log(JSON.stringify(result, null, 2)); // Nicely format the output for readability
-//Note that objects are unordered.
-//Can't display how they are askinging with regards to order without losing the object structure they are also asking for...
