@@ -118,23 +118,11 @@ const isDue = (dueDate) => {
 const scoreCalc = (dueDate, submittedAt, score, possiblepts) => {
   const submissionDate = new Date(submittedAt);
   const dateDue = new Date(dueDate);
-  const updatedScore = (score / possiblepts * 100);
-  if (submissionDate > dateDue) {
-    return updatedScore - updatedScore * 0.1;
-  } else {
-    return updatedScore;
-  }
+  // Apply penalty directly to the raw score if late
+  let finalScore = submissionDate > dateDue ? score - possiblepts * 0.1 : score;
+  // Then convert to a percentage for consistent representation
+  return (finalScore / possiblepts) * 100;
 };
-
-
-
-
-//Making a new result array of objects which looks like this:
-
-
-
-
-
 
 //////////////////////////// MAIN PROGRAM ////////////////////////////
 
@@ -151,72 +139,70 @@ function getLearnerData(course, ag, submissions) {
   //for every student in StudentList....
   studentList.forEach((student) => {
     //Set their assignment count and total score to 0 for now
-    //Calculate average, create assignment and grade array
+    //create assignment and grade array
     let assignmentCount = 0;
     let totalScore = 0;
-    let assignmentAndGrade = [];
+    let assignmentsResults = {};
     //forEach iterate overall objects in learnerSubmissions
-    LearnerSubmissions.forEach(submission => {
+    submissions.forEach((submission) => {
       //check if student is a match to LearnerSubmissions ->  learner_id, if so, do:
       if (student === submission.learner_id) {
         //Save all this as variables that are easier to refer to:
-        let learnerID = submission.learner_id;
         let assignmentID = submission.assignment_id;
         let submittedAt = submission.submission.submitted_at;
         let score = submission.submission.score;
-        //Check if assignment is due:
-        let isAssignmentDue = isDue(dueDate);
-          if (isAssignmentDue) {
-            //If it is due, we need to calculate their score
-            //To calculate score we need to know when it was due, when it was submitted, their score and the total possible score.
-            AssignmentGroup.forEach(assignment => {
-              if (assignmentID === assignment.id) {
-                let dueDate = assignment.due_at;
-                let possiblepts = assignment.points_possible;
-                let score = scoreCalc(dueDate, submittedAt, score, possiblepts) //Calc the score incl if its late
-                assignmentCount += 1; //keep track of total student assignments for avg
-                totalScore += score; //keep track of total student score for avg
-                assignmentAndGrade.push(['assignmentID', 'score']); //Push the assignment and grade pair to array
-              } else {
-                  continue;
-              }
+        //For each assignment in AssignmentGroup...:
+        AssignmentGroup.assignments.forEach((assignment) => {
+          if (assignmentID === assignment.id) {
+            let dueDate = assignment.due_at;
+            //Check if assignment is due:
+            let isAssignmentDue = isDue(dueDate);
+            if (isAssignmentDue) {
+              //If it is due, we need to calculate their score
+              //To calculate score we need to know when it was due, when it was submitted, their score and the total possible score.
+              let possiblepts = assignment.points_possible;
+              let calculatedScore = scoreCalc(
+                dueDate,
+                submittedAt,
+                score,
+                possiblepts
+              ); //Calc the score incl if its late
+              assignmentCount++; //keep track of total student assignments for avg
+              totalScore += calculatedScore; //keep track of total student score for avg
+              assignmentAndGrade.push(["assignmentID", "score"]); //Push the assignment and grade pair to array
             }
-          } else {
-              continue;
           }
-      } else {
-        continue;
+        });
+        let avg = assignmentCount > 0 ? totalScore / assignmentCount : 0; // Calculate average score if there are assignments considered
+        result.push({ id: student, avg, ...assignmentsResults }); // Add student result to the final array
       }
-    }
-    let avg = totalScore / assignmentCount;
-    result.push({id: student, avg: avg, assignmentAndGrade}); //Push the assignment and grade pair to array
-  }
+    });
+  });
   return result;
 }
 
-
 /////////////////////////////////////////////////////////////////////////////////////////
 
-const resultExampleFormat = [
-  {
-    // the ID of the learner for which this data has been collected
-    id: 125,
-    // the learner’s total, weighted average, in which assignments with more points_possible should be counted for more
-    avg: 0.985, // (47 + 150) / (50 + 150)
+// const resultExampleFormat = [
+//   {
+//     // the ID of the learner for which this data has been collected
+//     id: 125,
+//     // the learner’s total, weighted average, in which assignments with more points_possible should be counted for more
+//     avg: 0.985, // (47 + 150) / (50 + 150)
 
-    //Assignments:
-    //  Each assignment should be listed and have the key be set to its ID
-    //  and the value should be the percentage that the learner scored on the assignment (submission.score / points_possible)
-    1: 0.94, // 47 / 50
-    2: 1.0, // 150 / 150
-  },
-  {
-    id: 132,
-    avg: 0.82, // (39 + 125) / (50 + 150)
-    1: 0.78, // 39 / 50
-    2: 0.833, // late: (140 - 15) / 150
-  },
-];
+//     //Assignments:
+//     //  Each assignment should be listed and have the key be set to its ID
+//     //  and the value should be the percentage that the learner scored on the assignment (submission.score / points_possible)
+//     1: 0.94, // 47 / 50
+//     2: 1.0, // 150 / 150
+//   },
+//   {
+//     id: 132,
+//     avg: 0.82, // (39 + 125) / (50 + 150)
+//     1: 0.78, // 39 / 50
+//     2: 0.833, // late: (140 - 15) / 150
+//   },
+// ];
 
 const result = getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions);
 
