@@ -127,21 +127,21 @@ const scoreCalc = (dueDate, submittedAt, score, possiblepts) => {
   let finalScore = score; // Initialize finalScore
 
   switch (isOnTime) {
-    case "Late":
-      // Apply penalty directly to the raw score if late
-      finalScore -= possiblepts * 0.1; // Deduct 10% of possible points from score if late
-      break;
     case "On Time":
       // No penalty, so finalScore remains unchanged
       break;
+    case "Late":
+      // Apply penalty directly to the raw score if late
+      finalScore -=  * 0.1; // Deduct 10% of possible points from score if late
+      break;
     default:
-      // Ideally, you'll never hit this case, but it's good practice to handle unexpected cases
+      // Ideally, you'll never hit this
       console.error("Unexpected case for timeliness of submission");
       break;
   }
 
   // Then convert to a percentage for consistent representation
-  return (finalScore / possiblepts) * 100;
+  return finalScore / possiblepts;
 };
 
 //////////////////////////// MAIN PROGRAM ////////////////////////////
@@ -169,6 +169,7 @@ function getLearnerData(course, ag, submissions) {
         let score = submission.submission.score;
 
         ag.assignments.forEach((assignment) => {
+          //If a matching assignment is found...
           if (assignmentID === assignment.id) {
             let dueDate = assignment.due_at;
             let isAssignmentDue = isDue(dueDate);
@@ -188,10 +189,8 @@ function getLearnerData(course, ag, submissions) {
                   score,
                   possiblepts
                 );
-                totalScore += calculatedScore; // No need to multiply by possiblepts again as scoreCalc already considers it
-                assignmentsResults[assignmentID] = Number(
-                  (calculatedScore / 100).toFixed(2)
-                ); // Storing score percentage
+                totalScore += calculatedScore;
+                assignmentsResults[assignmentID] = Number(calculatedScore); // Storing score percentage
               } catch (error) {
                 console.error(
                   `Error with assignment ${assignmentID}: ${error.message}`
@@ -209,10 +208,10 @@ function getLearnerData(course, ag, submissions) {
 
     if (assignmentCount > 0) {
       // Calculate average percentage score across all assignments
-      let avg = (totalScore / totalPointsPossible) * 100;
+      let avg = totalScore / totalPointsPossible;
       result.push({
         id: student,
-        avg: Number(avg.toFixed(2)),
+        avg: Number(avg),
         ...assignmentsResults,
       });
     }
