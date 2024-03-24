@@ -139,44 +139,51 @@ function getLearnerData(course, ag, submissions) {
   let studentList = getStudentList();
   const result = [];
 
-  //for every student in StudentList....
   studentList.forEach((student) => {
-    //Set their assignment count and total score to 0 for now
-    //create assignment and grade array
     let assignmentCount = 0;
     let totalScore = 0;
-    let totalPointsPossible = 0; // Keep track of total points for weighted average
+    let totalPointsPossible = 0;
     let assignmentsResults = {};
-    //forEach iterate overall objects in learnerSubmissions
+
     submissions.forEach((submission) => {
-      //check if student is a match to LearnerSubmissions ->  learner_id, if so, do:
       if (student === submission.learner_id) {
-        //Save all this as variables that are easier to refer to:
         let assignmentID = submission.assignment_id;
         let submittedAt = submission.submission.submitted_at;
         let score = submission.submission.score;
-        //For each assignment in AssignmentGroup...:
-        AssignmentGroup.assignments.forEach((assignment) => {
+
+        ag.assignments.forEach((assignment) => {
           if (assignmentID === assignment.id) {
             let dueDate = assignment.due_at;
-            //Check if assignment is due:
             let isAssignmentDue = isDue(dueDate);
+
             if (isAssignmentDue) {
-              //If it is due, we need to calculate their score
-              //To calculate score we need to know when it was due, when it was submitted, their score and the total possible score.
               let possiblepts = assignment.points_possible;
-              let calculatedScore = scoreCalc(
-                dueDate,
-                submittedAt,
-                score,
-                possiblepts
-              ); //Calc the score incl if its late
-              assignmentCount++; //keep track of total student assignments for avg
-              totalScore += calculatedScore * possiblepts; // Weight by points possible
-              totalPointsPossible += possiblepts;
-              assignmentsResults[assignmentID] = (
-                calculatedScore / 100
-              ).toFixed(2); // Store as a fraction for consistency
+              let calculatedScore;
+
+              try {
+                if (possiblepts === 0) {
+                  throw new Error("Points possible cannot be zero.");
+                }
+
+                calculatedScore = scoreCalc(
+                  dueDate,
+                  submittedAt,
+                  score,
+                  possiblepts
+                );
+                totalScore += calculatedScore; // No need to multiply by possiblepts again as scoreCalc already considers it
+                assignmentsResults[assignmentID] = Number(
+                  (calculatedScore / 100).toFixed(2)
+                ); // Storing score percentage
+              } catch (error) {
+                console.error(
+                  `Error with assignment ${assignmentID}: ${error.message}`
+                );
+              } finally {
+                totalPointsPossible += possiblepts;
+              }
+
+              assignmentCount++;
             }
           }
         });
@@ -184,10 +191,16 @@ function getLearnerData(course, ag, submissions) {
     });
 
     if (assignmentCount > 0) {
-      let avg = totalScore / totalPointsPossible / 100; // Calculate weighted average correctly
-      result.push({ id: student, avg, ...assignmentsResults });
+      // Calculate average percentage score across all assignments
+      let avg = (totalScore / totalPointsPossible) * 100;
+      result.push({
+        id: student,
+        avg: Number(avg.toFixed(2)),
+        ...assignmentsResults,
+      });
     }
   });
+
   return result;
 }
 
