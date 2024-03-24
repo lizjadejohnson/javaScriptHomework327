@@ -37,3 +37,20 @@ The ultimate goal is to analyze and transform this data such that the output of 
 // if an assignment is not yet due, it should not be included in either
 // the average or the keyed dictionary of scores
 }
+
+What could you have done differently during the planning stages of your project to make the execution easier?
+I feel like I started out doing a good job creating small functions, but then when it came to
+iterate through objects and arrays and things, for some reason I just gave that up.
+Of course, when I'm calculating grades and everything I'm calling functions.
+But my program feels really congested with all the looping within looping within looping.
+I feel like maybe I could have done a better job of creating new data formats upfront or something.
+
+Were there any requirements that were difficult to implement? What do you think would make them easier to implement in future projects?
+I think I need to spend more time working with switch statements. I don't really find them confusing per se,
+but they like never feel right to implement. I had a really hard time as I was writing this coming up with
+a way to use them. I sort of just forced it at the end.
+
+What would you add to, or change about your application if given more time?
+I am fully aware this is a hulking behemoth probably twice as big as it needs to be haha. I would definitely
+try to refactor how I'm handling the old data, the new data, and encapsulating functions just to make it all
+a lot more tight.
