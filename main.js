@@ -98,7 +98,7 @@ const getStudentList = () => {
 // 2. You should also account for potential errors in the data that your program receives.
 // What if points_possible is 0? You cannot divide by zero.
 // What if a value that you are expecting to be a number is instead a string?
-// (try/catch, throw errors)
+// (try/catch, throw errors) - will implements later, ignore for now
 
 // 3. If an assignment is not yet due, do not include it in the results or the average.
 // * Make a simple function which compares dates to see due yet. In actual program, call to check if due if not ignore it.
@@ -113,15 +113,16 @@ const isDue = (dueDate) => {
 };
 
 // 4. If the learner's submission is late, deduct 10 percent of the total points possible from their score for that assignment.
-// * Make a simple function which compares dates to see if late. In actual program, call to check if late
+// function which compares dates to see if late. Call to check if late, if it is, deduct.
 
-const scoreCalc = (submittedAt,score) => {
+const scoreCalc = (dueDate, submittedAt, score, possiblepts) => {
   const submissionDate = new Date(submittedAt);
-  const dateDue = new Date(dueDate); //get due date from iterating over assignments list!!
+  const dateDue = new Date(dueDate);
+  const updatedScore = (score / possiblepts * 100);
   if (submissionDate > dateDue) {
-    return score - score * 0.1;
+    return updatedScore - updatedScore * 0.1;
   } else {
-    return score;
+    return updatedScore;
   }
 };
 
@@ -131,7 +132,7 @@ const scoreCalc = (submittedAt,score) => {
 //Making a new result array of objects which looks like this:
 
 
-const result = [];
+
 
 
 
@@ -145,32 +146,37 @@ function getLearnerData(course, ag, submissions) {
   verifyCourseID(course, ag);
 
   let studentList = getStudentList();
+  const result = [];
 
   //for every student in StudentList....
   studentList.forEach((student) => {
+    //Set their assignment count and total score to 0 for now
+    //Calculate average, create assignment and grade array
+    let assignmentCount = 0;
+    let totalScore = 0;
+    let assignmentAndGrade = [];
     //forEach iterate overall objects in learnerSubmissions
     LearnerSubmissions.forEach(submission => {
       //check if student is a match to LearnerSubmissions ->  learner_id, if so, do:
-      if (student === learnerID) {
+      if (student === submission.learner_id) {
         //Save all this as variables that are easier to refer to:
         let learnerID = submission.learner_id;
         let assignmentID = submission.assignment_id;
         let submittedAt = submission.submission.submitted_at;
         let score = submission.submission.score;
-
-        let isDue = isDue(dueDate);
-          if (isDue) {
+        //Check if assignment is due:
+        let isAssignmentDue = isDue(dueDate);
+          if (isAssignmentDue) {
             //If it is due, we need to calculate their score
             //To calculate score we need to know when it was due, when it was submitted, their score and the total possible score.
             AssignmentGroup.forEach(assignment => {
-              let assignmentCount = 0
-              let totalScore = 0;
-              if (assignmentID === id) {
+              if (assignmentID === assignment.id) {
                 let dueDate = assignment.due_at;
                 let possiblepts = assignment.points_possible;
-                let score = scoreCalc(dueDate, submittedAt, score, possiblepts)
-                let assignmentCount =+ 1;
-                let totalScore =+ score;
+                let score = scoreCalc(dueDate, submittedAt, score, possiblepts) //Calc the score incl if its late
+                assignmentCount += 1; //keep track of total student assignments for avg
+                totalScore += score; //keep track of total student score for avg
+                assignmentAndGrade.push(['assignmentID', 'score']); //Push the assignment and grade pair to array
               } else {
                   continue;
               }
@@ -182,51 +188,35 @@ function getLearnerData(course, ag, submissions) {
         continue;
       }
     }
-
-
-
-      //Then we can store the assignment id and their score as a key:value pair in an array called assignmentScores
-
-       //Create new result object with student id
-       //send over the assignment ID and final score
-
-    }
-  });
-  // this
-  //else continue
-
-  //Need to call to see if assignment is due (if not, ignore), or if assignment is late (deduct points)
-
-  //need to compare the LearnerSubmissions.forEach(submission => console.log(submission.submission.score)); against the
-  // AssignmentGroup -> assignments -> points_possible... figure out weighted averages...lol
-
-  //Crate key value pairs where the key is the AssignmentsGroup -> Assignment -> assignment_id
-  // and the value is the learners score -- LearnerSubmissions.forEach(submission => console.log(submission.submission.score));
-  // against the AssignmentGroup -> assignments -> points_possible
-
-  const resultttttt = [
-    {
-      // the ID of the learner for which this data has been collected
-      id: 125,
-      // the learner’s total, weighted average, in which assignments with more points_possible should be counted for more
-      avg: 0.985, // (47 + 150) / (50 + 150)
-
-      //Assignments:
-      //  Each assignment should be listed and have the key be set to its ID
-      //  and the value should be the percentage that the learner scored on the assignment (submission.score / points_possible)
-      1: 0.94, // 47 / 50
-      2: 1.0, // 150 / 150
-    },
-    {
-      id: 132,
-      avg: 0.82, // (39 + 125) / (50 + 150)
-      1: 0.78, // 39 / 50
-      2: 0.833, // late: (140 - 15) / 150
-    },
-  ];
-
+    let avg = totalScore / assignmentCount;
+    result.push({id: student, avg: avg, assignmentAndGrade}); //Push the assignment and grade pair to array
+  }
   return result;
 }
+
+
+/////////////////////////////////////////////////////////////////////////////////////////
+
+const resultExampleFormat = [
+  {
+    // the ID of the learner for which this data has been collected
+    id: 125,
+    // the learner’s total, weighted average, in which assignments with more points_possible should be counted for more
+    avg: 0.985, // (47 + 150) / (50 + 150)
+
+    //Assignments:
+    //  Each assignment should be listed and have the key be set to its ID
+    //  and the value should be the percentage that the learner scored on the assignment (submission.score / points_possible)
+    1: 0.94, // 47 / 50
+    2: 1.0, // 150 / 150
+  },
+  {
+    id: 132,
+    avg: 0.82, // (39 + 125) / (50 + 150)
+    1: 0.78, // 39 / 50
+    2: 0.833, // late: (140 - 15) / 150
+  },
+];
 
 const result = getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions);
 
