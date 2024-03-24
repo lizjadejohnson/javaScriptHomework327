@@ -105,26 +105,64 @@ const getStudentList = () => {
 
 // 3. If an assignment is not yet due, do not include it in the results or the average.
 // * Make a simple function which compares dates to see due yet. In actual program, call to check if due if not ignore it.
+// const isDue = (dueDate) => {
+//   const now = new Date();
+//   const due = new Date(dueDate);
+//   if (now >= due) {
+//     return true;
+//   } else {
+//     return false;
+//   }
+// };
+// The above code makes a lot more sense than the code I am about to share,
+// but the requirements are forcing me to use a switch statement so I'm shoehorning one in here:
 const isDue = (dueDate) => {
   const now = new Date();
   const due = new Date(dueDate);
-  if (now >= due) {
-    return true;
-  } else {
-    return false;
+
+  // Convert the boolean condition into a value that can be used with a switch statement
+  // This uses the fact that switch cases can evaluate expressions, and true will match the case that evaluates to true
+  switch (true) {
+    case now >= due:
+      return true;
+    default:
+      return false;
   }
 };
 
 // 4. If the learner's submission is late, deduct 10 percent of the total points possible from their score for that assignment.
 // function which compares dates to see if late. Call to check if late, if it is, deduct.
 
-const scoreCalc = (dueDate, submittedAt, score, possiblepts) => {
-  const submissionDate = new Date(submittedAt);
-  const dateDue = new Date(dueDate);
-  // Apply penalty directly to the raw score if late
-  let finalScore = submissionDate > dateDue ? score - possiblepts * 0.1 : score;
-  // Then convert to a percentage for consistent representation
-  return (finalScore / possiblepts) * 100;
+const scoreCalc = (dueDate, submittedAt, score, possiblepts, assignmentID) => {
+  let finalScore = 0;
+
+  try {
+    // Check for possible points being zero, which could cause a division by zero error
+    if (possiblepts === 0) {
+      throw new Error("Points possible cannot be zero.");
+    }
+
+    const submissionDate = new Date(submittedAt);
+    const dateDue = new Date(dueDate);
+
+    // Apply penalty directly to the raw score if late
+    finalScore = submissionDate > dateDue ? score - possiblepts * 0.1 : score;
+
+    // Ensure the final score does not drop below 0 after applying penalty
+    finalScore = Math.max(finalScore, 0);
+  } catch (error) {
+    console.error(
+      `Error calculating score for assignment ${assignmentID}: ${error.message}`
+    );
+    finalScore = 0; // Set a default score in case of error
+  } finally {
+    if (possiblepts !== 0) {
+      // Only calculate percentage if possible points is not zero to avoid division by zero:
+      finalScore = (finalScore / possiblepts) * 100;
+    }
+  }
+
+  return finalScore;
 };
 
 //////////////////////////// MAIN PROGRAM ////////////////////////////
