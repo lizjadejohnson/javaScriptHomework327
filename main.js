@@ -92,6 +92,7 @@ const getStudentList = () => {
   const studentList = LearnerSubmissions.map((learner) => learner.learner_id);
   // I knew sets exist, but I had to cheat to find how to do this:
   // Use a Set to remove duplicates, resulting in a list of unique learner_ids
+  // console.log(Array.from(new Set(studentList)));
   return Array.from(new Set(studentList));
 };
 
@@ -142,6 +143,7 @@ function getLearnerData(course, ag, submissions) {
     //create assignment and grade array
     let assignmentCount = 0;
     let totalScore = 0;
+    let totalPointsPossible = 0; // Keep track of total points for weighted average
     let assignmentsResults = {};
     //forEach iterate overall objects in learnerSubmissions
     submissions.forEach((submission) => {
@@ -168,15 +170,19 @@ function getLearnerData(course, ag, submissions) {
                 possiblepts
               ); //Calc the score incl if its late
               assignmentCount++; //keep track of total student assignments for avg
-              totalScore += calculatedScore; //keep track of total student score for avg
-              assignmentAndGrade.push(["assignmentID", "score"]); //Push the assignment and grade pair to array
+              totalScore += calculatedScore * possiblepts; // Weight by points possible
+              totalPointsPossible += possiblepts;
+              assignmentsResults[assignmentID] = calculatedScore / 100; // Store as a fraction for consistency
             }
           }
         });
-        let avg = assignmentCount > 0 ? totalScore / assignmentCount : 0; // Calculate average score if there are assignments considered
-        result.push({ id: student, avg, ...assignmentsResults }); // Add student result to the final array
       }
     });
+
+    if (assignmentCount > 0) {
+      let avg = totalScore / totalPointsPossible / 100; // Calculate weighted average correctly
+      result.push({ id: student, avg, ...assignmentsResults });
+    }
   });
   return result;
 }
