@@ -121,8 +121,25 @@ const isDue = (dueDate) => {
 const scoreCalc = (dueDate, submittedAt, score, possiblepts) => {
   const submissionDate = new Date(submittedAt);
   const dateDue = new Date(dueDate);
-  // Apply penalty directly to the raw score if late
-  let finalScore = submissionDate > dateDue ? score - possiblepts * 0.1 : score;
+  // let finalScore = submissionDate > dateDue ? score - possiblepts * 0.1 : score;
+  // Note - I had the above written, which I think is better, but the assignment calls for a case so ...
+  let isOnTime = submissionDate <= dateDue ? "On Time" : "Late";
+  let finalScore = score; // Initialize finalScore
+
+  switch (isOnTime) {
+    case "Late":
+      // Apply penalty directly to the raw score if late
+      finalScore -= possiblepts * 0.1; // Deduct 10% of possible points from score if late
+      break;
+    case "On Time":
+      // No penalty, so finalScore remains unchanged
+      break;
+    default:
+      // Ideally, you'll never hit this case, but it's good practice to handle unexpected cases
+      console.error("Unexpected case for timeliness of submission");
+      break;
+  }
+
   // Then convert to a percentage for consistent representation
   return (finalScore / possiblepts) * 100;
 };
@@ -209,3 +226,5 @@ function getLearnerData(course, ag, submissions) {
 const result = getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions);
 
 console.log(JSON.stringify(result, null, 2)); // Nicely format the output for readability
+//Note that objects are unordered.
+//Can't display how they are askinging with regards to order without losing the object structure they are also asking for...
