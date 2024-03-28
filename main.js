@@ -1,235 +1,143 @@
-// CourseInfo object - The provided course information:
-const CourseInfo = {
-  id: 451,
-  name: "Introduction to JavaScript",
-};
+//Student Data:
 
-// Assignment Group object:
-const AssignmentGroup = {
-  id: 12345,
-  name: "Fundamentals of JavaScript",
-  course_id: 451,
-  group_weight: 25,
-  //Array of assignment info objects:
-  assignments: [
-    {
-      id: 1,
-      name: "Declare a Variable",
-      due_at: "2023-01-25",
-      points_possible: 50,
-    },
-    {
-      id: 2,
-      name: "Write a Function",
-      due_at: "2023-02-27",
-      points_possible: 150,
-    },
-    {
-      id: 3,
-      name: "Code the World",
-      due_at: "3156-11-15",
-      points_possible: 500,
-    },
-  ],
-};
-
-// Array of learner submission data objects:
-const LearnerSubmissions = [
-  {
-    learner_id: 125,
-    assignment_id: 1,
-    submission: {
-      submitted_at: "2023-01-25",
-      score: 47,
-    },
+let allStudents = {
+  jordan: {
+    name: "Jordan",
+    grade: "",
+    missingAssignments: "",
   },
-  {
-    learner_id: 125,
-    assignment_id: 2,
-    submission: {
-      submitted_at: "2023-02-12",
-      score: 150,
-    },
+  kyle: {
+    name: "Kyle",
+    grade: "",
+    missingAssignments: "",
   },
-  {
-    learner_id: 125,
-    assignment_id: 3,
-    submission: {
-      submitted_at: "2023-01-25",
-      score: 400,
-    },
+  maxine: {
+    name: "Maxine",
+    grade: "",
+    missingAssignments: "",
   },
-  {
-    learner_id: 132,
-    assignment_id: 1,
-    submission: {
-      submitted_at: "2023-01-24",
-      score: 39,
-    },
+  kadesha: {
+    name: "Kadesha",
+    grade: "",
+    missingAssignments: "",
   },
-  {
-    learner_id: 132,
-    assignment_id: 2,
-    submission: {
-      submitted_at: "2023-03-07",
-      score: 140,
-    },
-  },
-];
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-// 1. If an AssignmentGroup does not belong to its course (mismatching course_id),
-// your program should throw an error, letting the user know that the input was invalid.
-// (try/catch) - try seeing if the assignment group id: (eg 12345) matches the course info id
-
-const verifyCourseID = (courseInfo, assignmentGroup) => {
-  if (assignmentGroup.course_id !== courseInfo.id) {
-    throw new Error(
-      `Course ID mismatch: ${assignmentGroup.course_id} does not match ${courseInfo.id}`
-    );
-  }
-};
-const getStudentList = () => {
-  const studentList = LearnerSubmissions.map((learner) => learner.learner_id);
-  // I knew sets exist, but I had to cheat to find how to do this:
-  // Use a Set to remove duplicates, resulting in a list of unique learner_ids
-  // console.log(Array.from(new Set(studentList)));
-  return Array.from(new Set(studentList));
 };
 
-// 2. You should also account for potential errors in the data that your program receives.
-// What if points_possible is 0? You cannot divide by zero.
-// What if a value that you are expecting to be a number is instead a string?
-// (try/catch, throw errors) - will implements later, ignore for now
+let students = ["Jordan", "Kyle", "Maxine", "Kadesha"];
 
-// 3. If an assignment is not yet due, do not include it in the results or the average.
-// * Make a simple function which compares dates to see due yet. In actual program, call to check if due if not ignore it.
-// const isDue = (dueDate) => {
-//   const now = new Date();
-//   const due = new Date(dueDate);
-//   if (now >= due) {
-//     return true;
-//   } else {
-//     return false;
-//   }
-// };
-// The above code makes a lot more sense than the code I am about to share,
-// but the requirements are forcing me to use a switch statement so I'm shoehorning one in here:
-const isDue = (dueDate) => {
-  const now = new Date();
-  const due = new Date(dueDate);
+let body = document.querySelector("body");
 
-  // Convert the boolean condition into a value that can be used with a switch statement
-  // This uses the fact that switch cases can evaluate expressions, and true will match the case that evaluates to true
-  switch (true) {
-    case now >= due:
-      return true;
-    default:
-      return false;
-  }
-};
+//Iterate over the students array, which contains the names
+//of all students. For each student, it performs
+//the following actions...
+const generateStudents = () => {
+  Object.entries(allStudents).forEach(([key, student]) => {
+    //Create Parent Container: A new div element (newParent) is created to serve
+    //as a container for that student's information. This container
+    //is assigned the class studentContainer.
+    let newParent = document.createElement("div");
+    newParent.setAttribute("class", "studentContainer");
 
-// 4. If the learner's submission is late, deduct 10 percent of the total points possible from their score for that assignment.
-// function which compares dates to see if late. Call to check if late, if it is, deduct.
+    ///////////////////////////////////////////////////////
+    //Create Name Parent, Name field, and name edit button:
+    //Name Parent:
+    let nameParent = document.createElement("div");
+    nameParent.setAttribute("class", "nameContainer");
+    //Name Field:
+    let studentName = document.createElement("div");
+    studentName.setAttribute("class", "namer");
+    studentName.innerHTML = `Name: ${student.name}`;
+    studentName.style.display = "inline";
+    studentName.style.paddingRight = "10px";
+    //Edit name button:
+    let editNameButton = document.createElement("button");
+    editNameButton.setAttribute("class", "namebtn");
+    editNameButton.innerHTML = `Edit Name`;
 
-const scoreCalc = (dueDate, submittedAt, score, possiblepts, assignmentID) => {
-  let finalScore = 0;
+    //Edit name button on click event listener:
+    editNameButton.addEventListener("click", (e) => {
+      let updatedName = prompt("New student name:", student.name);
+      if (updatedName && updatedName.trim() !== "") {
+        // Update the allStudents object with the new name
+        allStudents[key] = { ...allStudents[key], name: updatedName };
 
-  try {
-    // Check for possible points being zero, which could cause a division by zero error
-    if (possiblepts === 0) {
-      throw new Error("Points possible cannot be zero.");
-    }
-
-    const submissionDate = new Date(submittedAt);
-    const dateDue = new Date(dueDate);
-
-    // Apply penalty directly to the raw score if late
-    finalScore = submissionDate > dateDue ? score - possiblepts * 0.1 : score;
-
-    // Ensure the final score does not drop below 0 after applying penalty
-    finalScore = Math.max(finalScore, 0);
-  } catch (error) {
-    console.error(
-      `Error calculating score for assignment ${assignmentID}: ${error.message}`
-    );
-    finalScore = 0; // Set a default score in case of error
-  } finally {
-    if (possiblepts !== 0) {
-      // Only calculate percentage if possible points is not zero to avoid division by zero:
-      finalScore = (finalScore / possiblepts) * 100;
-    }
-  }
-
-  return finalScore;
-};
-
-//////////////////////////// MAIN PROGRAM ////////////////////////////
-
-// Create a function named getLearnerData() that accepts these values as parameters,
-// in the order listed: (CourseInfo, AssignmentGroup, [LearnerSubmission]),
-// and returns the formatted result, which should be an array of objects as described.
-
-function getLearnerData(course, ag, submissions) {
-  verifyCourseID(course, ag);
-
-  let studentList = getStudentList();
-  const result = [];
-
-  //for every student in StudentList....
-  studentList.forEach((student) => {
-    //Set their assignment count and total score to 0 for now
-    //create assignment and grade array
-    let assignmentCount = 0;
-    let totalScore = 0;
-    let totalPointsPossible = 0; // Keep track of total points for weighted average
-    let assignmentsResults = {};
-    //forEach iterate overall objects in learnerSubmissions
-    submissions.forEach((submission) => {
-      //check if student is a match to LearnerSubmissions ->  learner_id, if so, do:
-      if (student === submission.learner_id) {
-        //Save all this as variables that are easier to refer to:
-        let assignmentID = submission.assignment_id;
-        let submittedAt = submission.submission.submitted_at;
-        let score = submission.submission.score;
-        //For each assignment in AssignmentGroup...:
-        AssignmentGroup.assignments.forEach((assignment) => {
-          if (assignmentID === assignment.id) {
-            let dueDate = assignment.due_at;
-            //Check if assignment is due:
-            let isAssignmentDue = isDue(dueDate);
-            if (isAssignmentDue) {
-              //If it is due, we need to calculate their score
-              //To calculate score we need to know when it was due, when it was submitted, their score and the total possible score.
-              let possiblepts = assignment.points_possible;
-              let calculatedScore = scoreCalc(
-                dueDate,
-                submittedAt,
-                score,
-                possiblepts
-              ); //Calc the score incl if its late
-              assignmentCount++; //keep track of total student assignments for avg
-              totalScore += calculatedScore * possiblepts; // Weight by points possible
-              totalPointsPossible += possiblepts;
-              assignmentsResults[assignmentID] = (
-                calculatedScore / 100
-              ).toFixed(2); // Store as a fraction for consistency
-            }
-          }
-        });
+        // Update the UI to reflect the change immediately
+        studentName.innerHTML = `Name: ${updatedName}`;
       }
     });
+    //////////////////////////////////////////////////////////
 
-    if (assignmentCount > 0) {
-      let avg = totalScore / totalPointsPossible / 100; // Calculate weighted average correctly
-      result.push({ id: student, avg, ...assignmentsResults });
-    }
+    //Create grade parent, grade field, and grade edit button
+    //Grade Parent:
+    let gradeParent = document.createElement("div");
+    gradeParent.setAttribute("class", "gradeContainer");
+    //Grade Field:
+    let studentGrade = document.createElement("div");
+    studentGrade.setAttribute("class", "grader");
+    studentGrade.innerHTML = `Grade: ${student.grade || "00"}`;
+    studentGrade.style.display = "inline";
+    studentGrade.style.paddingRight = "10px";
+    //Grade Edit Button:
+    let editGradeButton = document.createElement("button");
+    editGradeButton.setAttribute("class", "gradebtn");
+    editGradeButton.innerHTML = `Edit Grade`;
+
+    //Edit grade button on click event listener:
+    editGradeButton.addEventListener("click", (e) => {
+      let updatedGrade = prompt("New student grade:", student.grade);
+
+      // Update the allStudents object with the new name
+      allStudents[key] = { ...allStudents[key], grade: updatedGrade };
+
+      // Update the UI to reflect the change immediately
+      studentGrade.innerHTML = `Grade: ${updatedGrade}`;
+    });
+    ///////////////////////////////////////////////////////////////////
+
+    //Create assignment parent, assignment field, and assignment edit button:
+    //Assignment parent:
+    let assignParent = document.createElement("div");
+    assignParent.setAttribute("class", "assignContainer");
+    //Assignment field:
+    let studentAssign = document.createElement("div");
+    studentAssign.setAttribute("class", "assign");
+    studentAssign.innerHTML = `Assignment: ${
+      student.missingAssignments || "n/a"
+    }`;
+    studentAssign.style.display = "inline";
+    studentAssign.style.paddingRight = "10px";
+    //Assignment Button:
+    let editAssignButton = document.createElement("button");
+    editAssignButton.setAttribute("class", "assignbtn");
+    editAssignButton.innerHTML = `Edit Assignment`;
+
+    //Edit name button on click event listener:
+    editAssignButton.addEventListener("click", (e) => {
+      let updatedAssign = prompt("New assignment:", student.missingAssignments);
+      // Update the allStudents object with the new assignment
+      allStudents[key] = {
+        ...allStudents[key],
+        missingAssignments: updatedAssign,
+      };
+
+      // Update the UI to reflect the change immediately
+      studentAssign.innerHTML = `Assignment: ${updatedAssign}`;
+    });
+
+    // -------------------------------------------------------------
+    //Appending Elements: Each of the created elements
+    //(studentName, studentGrade, and studentAssign) is appended
+    //to the newParent container.
+    newParent.append(nameParent);
+    nameParent.append(studentName, editNameButton);
+
+    newParent.append(gradeParent);
+    gradeParent.append(studentGrade, editGradeButton);
+
+    newParent.append(assignParent);
+    assignParent.append(studentAssign, editAssignButton);
+
+    //The fully populated newParent container is then appended to the body of the document.
+    body.append(newParent);
   });
-  return result;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////
-
-const result = getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions);
-console.log(JSON.stringify(result, null, 2)); // Nicely format the output for readability
+};
