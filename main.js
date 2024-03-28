@@ -23,7 +23,7 @@ let allStudents = {
   },
 };
 
-let students = ["Jordan", "Kyle", "Maxine", "Kadesha"];
+// let students = ["Jordan", "Kyle", "Maxine", "Kadesha"];
 
 let body = document.querySelector("body");
 
@@ -57,13 +57,11 @@ const generateStudents = () => {
     //Edit name button on click event listener:
     editNameButton.addEventListener("click", (e) => {
       let updatedName = prompt("New student name:", student.name);
-      if (updatedName && updatedName.trim() !== "") {
-        // Update the allStudents object with the new name
-        allStudents[key] = { ...allStudents[key], name: updatedName };
+      // Update the allStudents object with the new name
+      allStudents[key] = { ...allStudents[key], name: updatedName };
 
-        // Update the UI to reflect the change immediately
-        studentName.innerHTML = `Name: ${updatedName}`;
-      }
+      // Update the UI to reflect the change immediately
+      studentName.innerHTML = `Name: ${updatedName}`;
     });
     //////////////////////////////////////////////////////////
 
